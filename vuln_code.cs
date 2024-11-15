@@ -1,11 +1,41 @@
-var sql = "SELECT * FROM UserAccount WHERE Username = '" + username "'";
-SqlCommand command = new SqlCommand(sql , connection);
-SqlDataReader reader = command.ExecuteReader();
+﻿using NETMVCBlot.Utility;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
 
-var name = '@Html.Raw(HttpUtility.JavaScriptStringEncode(Model.Name))';
+namespace NETMVCBlot.Controllers
+{
+    public class CallbackController : BaseController
+    {
+        protected override void Utility()
+        {
 
+        }
 
-<img src="http://example.com/foo.jpg" alt="" onload="alert('xss')" />
+        [HttpPost]
+        public ActionResult Download(string fileName)
+        {
+            if (!IBValidator.IsValidFileName(fileName))
+                return new HttpNotFoundResult();
 
+            // CTSECISSUE:DirectoryTraversal
+            return new FilePathResult(@"D:\wwwroot\reports\" + fileName, "application/pdf");
+        }
 
-  
+        public String DownloadAsString(string fileName)
+        {
+            // CTSECISSUE:DirectoryTraversal
+            return System.IO.File.ReadAllText(@"D:\wwwroot\reports\" + fileName);
+        }
+
+        public JsonResult ExecuteProcess(string argument)
+        {
+            // CTSECISSUE: OSCommandInjection
+            Process.Start("cmd.exe", "/C ping.exe " + argument);
+            return null;
+        }
+    }
+}
